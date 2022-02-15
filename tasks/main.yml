@@ -7,6 +7,13 @@
 - name: Distribution major version
   debug: msg="{{ ansible_distribution_major_version }}"
 
+- name: Install dnf and python-ipaddress if we are on CentOS 7
+  yum:
+    name: ["dnf", "python-ipaddress"]
+    state: present
+  when: ansible_distribution_major_version == "7"
+
+
 - name: Install the pgdg repo
   dnf:
     name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ansible_distribution_major_version}}-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
@@ -62,35 +69,12 @@
     src: "pg_hba.conf"
     dest: "/var/lib/pgsql/{{postgresql_major_version}}/data/pg_hba.conf"
     owner: postgres
-    group: postgress
+    group: postgres
     mode: '0600'
     backup: yes
   when: pgsql_installed.changed == True
   notify: Restart Postgresql
 
-- name: Revoke access from local user mary on database mydb
-  community.postgresql.postgresql_pg_hba:
-    dest: /var/lib/pgsql/{{postgresql_major_version}}/data/pg_hba.conf
-    contype: local
-    users: mary
-    databases: mydb
-    state: present
-    method: trust
-  tags:
-    - pg_hba
-
-#- name: set localhost to trust
-#  community.postgresql.postgresql_pg_hba:
-#    dest: /var/lib/pgsql/{{postgresql_major_version}}/data/pg_hba.conf
-#    contype: host
-#    users: all
-#    databases: all
-#    state: present
-#    source: 127.0.0.1/32
-#    method: trust
-#  tags:
-#    - pg_hba
-#
 - debug:
     msg: "{{postgresql_pg_hba_conf}}"
   tags:
