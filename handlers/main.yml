@@ -1,0 +1,6 @@
+---
+# handlers file for jnvilo.postgresql
+- name: Restart Postgresql
+  ansible.builtin.service:
+    name: "postgresql-{{postgresql_major_version}}"
+    state: restarted
