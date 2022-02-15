@@ -1,5 +1,42 @@
-Role Name
-=========
+Ansible Role: PostgreSQL
+========================
+
+Rewritten from the ground up to take advantage of the community roles provided already within 
+ansible. Previous iterations used a lot of duct tape. Those were removed and a lot of the 
+operations can be done using (Community.Postgresql)[https://docs.ansible.com/ansible/latest/collections/community/postgresql/index.html]
+
+Basic Usage: (Sample Playbook)
+------------------------------
+```
+- hosts: pgdg
+  become: true
+  remote_user: ansible
+  gather_facts: yes
+  vars:
+    #Postgres vars
+    postgresql_major_version: 10
+    postgresql_minor_version: 10.8-1PGDG.rhel8
+    postgresql_pg_hba_conf:
+      #create adam user
+      - type: "local"
+        users: "adam"
+        databases: "all"
+        method: "trust"
+        source: "127.0.0.1/32"
+        state: "present"
+      #configurate such that all local users use "trust" i.e. no password needed
+      - type: "local"
+        users: "all"
+        databases: "all"
+        method: "ident"
+        source: "127.0.0.1/32"
+        state: "present"
+ roles:
+    - postgresql
+```
+
+
+
 
 
 ## pg_hba.conf
