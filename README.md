@@ -5,6 +5,13 @@ Rewritten from the ground up to take advantage of the community roles provided a
 ansible. Previous iterations used a lot of duct tape. Those were removed and a lot of the 
 operations can be done using (Community.Postgresql)[https://docs.ansible.com/ansible/latest/collections/community/postgresql/index.html]
 
+Supported OS:
+-------------
+
+* Rocky Linux
+* CentOS 8 / CentOS 8 Stream
+* CentOS 7
+
 Basic Usage: (Sample Playbook)
 ------------------------------
 ```
