@@ -1,2 +1,2 @@
----
-# defaults file for jnvilo.postgresql
+postgresql_version: "9.6"
+insecure_postgres_server: true

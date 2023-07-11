@@ -1,6 +1,15 @@
 ---
 # handlers file for jnvilo.postgresql
-- name: Restart Postgresql
+- name: Restart PostgreSQL (Red Hat/CentOS)
   ansible.builtin.service:
     name: "postgresql-{{postgresql_major_version}}"
     state: restarted
+  when: ansible_distribution in ['Red Hat', 'CentOS', 'RockyLinux']
+
+- name: Restart PostgreSQL (Debian/Ubuntu)
+  service:
+    name: "postgresql"
+    state: restarted
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+
