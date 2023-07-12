@@ -1,0 +1,3 @@
+#Ubuntu specific vars here
+
+postgresql_version: 9.6

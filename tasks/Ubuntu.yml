@@ -1,0 +1,85 @@
+- name: Add PGDG apt repository key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Add PGDG apt repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: pgdg.list
+    update_cache: yes
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+
+- name: Install PostgreSQL and contrib packages
+  apt:
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-contrib-{{ postgresql_version }}"
+      - "python3-psycopg2"
+      - "locales"
+    state: present
+    update_cache: yes
+
+- name: Ensure Postgresql is started
+  systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  tags:
+    - systemd_postgresql
+    - postgresql_role
+
+
+- name: Deploy Insecure Config if insecure_postgresql is true
+  copy:
+    src: insecure_pg_hba.conf
+    dest: /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
+    mode: '0640'
+  when: insecure_postgres_server 
+  notify: Restart PostgreSQL (Debian/Ubuntu)
+  tags:
+    - postgresql_role
+  register: pg_hba_changed
+
+
+- name: Restart PostgreSQL if pg_hba is changed
+  systemd:
+    name: postgresql
+    state: restarted
+  when: pg_hba_changed 
+
+
+- name: ensure we have fi_FI locale 
+  locale_gen:
+    name: fi_FI.UTF-8
+    state: present
+
+- name: Create PostgreSQL roles
+  postgresql_user:
+    name: "{{ db.owner }}"
+    password: "{{ db.password }}"
+    state: present
+  loop: "{{ databases }}"
+  loop_control:
+    loop_var: db
+  when: databases is defined
+
+- name: Create databases
+  postgresql_db:
+    name: "{{ db.name }}"
+    owner: "{{ db.owner }}"
+    encoding: "{{ db.encoding | default('UTF8') }}"
+    lc_collate: "{{ db.lc_collate | default('fi_FI.utf8') }}"
+    lc_ctype: "{{ db.lc_ctype | default('fi_FI.utf8') }}"
+    template: "template0"
+  loop: "{{ databases }}"
+  loop_control:
+    loop_var: db
+  when: databases is defined
+
+
